@@ -236,7 +236,8 @@ window.TourPanel = o => {
     q('.tv-next').textContent = !next ? '처음으로' : away ? `다음 · ${names[sceneOf(next)]}로 이동` : '다음';
     q('.tv-btn--next').classList.toggle('is-away', away);
     paint();
-    trail(prevK != null ? tour.steps[prevK] : null, st);
+    // 데이터 이동은 바로 다음 단계로 한 칸 나아갈 때만 (건너뛰기 · 뒤로 가기는 없는 길이 그려지므로 장치만 바로 켬)
+    trail(prevK != null && prevK === tk - 1 ? tour.steps[prevK] : null, st);
     o.hint.textContent = '';
   };
   // 언어를 바꾸면: 목록의 미니 노선 점 · 진행 화면의 단계 점 색을 다시 칠하고, 보던 단계를 다시 그림
