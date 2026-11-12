@@ -1,0 +1,229 @@
+/* =========================================================
+   흐름 패널 — 하드웨어 보드와 부품 화면 공용
+   목록: 단계를 점으로 잇는 미니 노선
+   진행: 위는 노선 진행 + 데이터 패킷, 아래는 단계 설명
+   ========================================================= */
+@keyframes caret { 50% { opacity: 0; } }
+@keyframes slideIn { to { opacity: 1; transform: none; } }
+@keyframes livePulse { 50% { opacity: 0.25; } }
+@keyframes ring { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(2.4); opacity: 0; } }
+@keyframes runLine { from { background-position: -60px 0; } to { background-position: 260px 0; } }
+@keyframes dataIn { from { opacity: 0; transform: translateX(-10px); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+/* ----- 배치: 장면은 왼쪽으로 조금 밀림 ----- */
+.has-tours .hw-stage { padding-right: 372px; transition: padding 0.6s var(--ease); }
+body.has-tours .board, body.has-tours.scene-page .board { width: min(calc(100vw - 400px), calc((100svh - 130px) * 1.81)); }
+.has-tours .hint { right: 380px; }
+.touring .hint { opacity: 0 !important; }
+.touring .board .part:not(.is-hot) { cursor: pointer; }
+.tours {
+  --line: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.14);
+  position: fixed; top: 86px; right: 24px; bottom: 24px; width: 356px; z-index: 6; overflow: hidden;
+  padding: 4px 4px 4px 26px; border-left: 1px solid var(--line);
+  opacity: 0; animation: fadeUp 0.8s var(--ease) 0.6s forwards;
+}
+/* 세로 경계선 위를 빛이 천천히 흐름 */
+.tours::before {
+  content: ''; position: absolute; left: -1px; top: 0; width: 1px; height: 30%;
+  background: linear-gradient(transparent, var(--lav-2), transparent); opacity: 0.7; animation: scan 6s linear infinite;
+}
+.is-leaving .tours, .is-diving .tours, .tours.is-leaving { opacity: 0 !important; transition: opacity 0.35s; }
+.modal-open .tours { opacity: 0.25 !important; transition: opacity 0.4s; }
+.tours__list, .tours__view { position: absolute; inset: 4px 4px 4px 26px; overflow-y: auto; scrollbar-width: none; transition: opacity 0.4s, transform 0.5s var(--ease); }
+.tours__list::-webkit-scrollbar, .tours__view::-webkit-scrollbar { display: none; }
+.tours__view { opacity: 0; transform: translateX(24px); pointer-events: none; padding: 6px 14px 6px 14px; margin-left: -14px; }
+/* 지금 단계 점의 빛과 고리가 가장자리에서 잘리지 않도록 안쪽 여백을 두고 그만큼 왼쪽으로 당김 */
+.tours.is-view .tours__list { opacity: 0; transform: translateX(-24px); pointer-events: none; }
+.tours.is-view .tours__view { opacity: 1; transform: none; pointer-events: auto; }
+.tours__eyebrow { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.26em; color: var(--lav); }
+.tours__title { margin: 0 0 10px; font-size: 26px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.25; }
+.tours__lead { margin: 0 0 26px; font-size: 15px; line-height: 1.7; color: var(--muted); }
+.tours__label { display: flex; align-items: center; gap: 10px; margin: 24px 0 4px; font-size: 12px; font-weight: 700; letter-spacing: 0.14em; color: var(--muted); }
+.tours__label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ----- 목록: 미니 노선 ----- */
+.tour-item {
+  position: relative; display: grid; grid-template-columns: 1fr auto; grid-template-areas: 'route route' 'txt meta';
+  row-gap: 10px; column-gap: 12px; width: 100%; padding: 18px 8px 16px; text-align: left; cursor: pointer; font: inherit; color: var(--text);
+  background: none; border: 0; border-radius: 12px; transform: translateX(-10px);
+  opacity: 0; animation: slideIn 0.5s var(--ease) forwards; animation-delay: calc(0.9s + var(--i) * 0.08s);
+  transition: background-color 0.3s;
+}
+.tour-item + .tour-item::before { content: ''; position: absolute; left: 8px; right: 8px; top: 0; height: 1px; background: var(--line); }
+.tour-item:hover, .tour-item:focus-visible { background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.08); outline: none; }
+.ti-route { grid-area: route; position: relative; display: flex; justify-content: space-between; align-items: center; height: 10px; padding: 0 2px; }
+.ti-route::before { content: ''; position: absolute; left: 6px; right: 6px; top: 50%; height: 1px; background: var(--line); }
+/* 마우스를 올리면 빛이 노선을 따라 흐름 */
+.ti-route::after {
+  content: ''; position: absolute; left: 6px; right: 6px; top: calc(50% - 0.5px); height: 1px; opacity: 0;
+  background: linear-gradient(90deg, transparent, #fff, transparent) no-repeat; background-size: 60px 1px; transition: opacity 0.3s;
+}
+.tour-item:hover .ti-route::after { opacity: 1; animation: runLine 1.4s linear infinite; }
+.ti-route i {
+  position: relative; z-index: 1; width: 7px; height: 7px; border-radius: 50%;
+  background: #0b0a10; border: 1.5px solid hsl(var(--nh, var(--h)) calc(85% * var(--sat, 1)) 68%);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+.ti-route i[style] { border-color: hsl(var(--nh) 85% 68%); }
+.tour-item:hover .ti-route i { background: hsl(var(--nh, var(--h)) calc(85% * var(--sat, 1)) 68%); box-shadow: 0 0 8px hsl(var(--nh, var(--h)) calc(85% * var(--sat, 1)) 68%); }
+.tour-item:hover .ti-route i[style] { background: hsl(var(--nh) 85% 68%); box-shadow: 0 0 8px hsl(var(--nh) 85% 68%); }
+.ti-txt { grid-area: txt; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ti-txt b { font-size: 16.5px; font-weight: 700; letter-spacing: -0.01em; }
+.ti-txt small { font-size: 14px; line-height: 1.55; color: var(--muted); }
+.ti-meta { grid-area: meta; align-self: end; display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; color: var(--lav); white-space: nowrap; }
+.ti-meta svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s var(--ease); }
+.tour-item:hover .ti-meta svg { transform: translateX(3px); }
+
+/* ----- 진행 화면 ----- */
+.tours__back {
+  display: inline-flex; align-items: center; gap: 4px; margin: 0 0 18px -6px; padding: 6px 8px; border: 0; border-radius: 8px; background: none;
+  color: var(--muted); font: inherit; font-size: 14px; cursor: pointer; transition: color 0.25s, background-color 0.25s;
+}
+.tours__back:hover { color: var(--text); background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.12); }
+.tours__back svg, .tv-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.tv-where { display: flex; align-items: center; gap: 8px; transition: color 0.4s; }
+.tv-where::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--lav-hi); box-shadow: 0 0 8px var(--lav); animation: livePulse 1.6s ease-in-out infinite; }
+.tv-where::after { content: 'LIVE'; margin-left: auto; font-size: 10.5px; letter-spacing: 0.2em; color: var(--muted); }
+.tv-title { font-size: 23px; margin-bottom: 20px; }
+
+/* 노선 진행: 단계마다 점, 지나온 구간은 빛나는 선 */
+.tv-line { --p: 0; position: relative; display: flex; justify-content: space-between; align-items: center; height: 22px; margin: 0 0 26px; }
+.tv-line::before, .tv-line::after { content: ''; position: absolute; left: 11px; top: 50%; height: 2px; margin-top: -1px; border-radius: 2px; }
+.tv-line::before { right: 11px; background: var(--line); }
+.tv-line::after {
+  width: calc((100% - 22px) * var(--p)); background: linear-gradient(90deg, var(--lav-3), var(--lav-hi));
+  box-shadow: 0 0 10px var(--lav-2); transition: width 0.7s var(--ease);
+}
+.tv-node { position: relative; z-index: 1; display: grid; place-items: center; width: 22px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; }
+.tv-node span {
+  --c: hsl(var(--nh, var(--h)) calc(85% * var(--sat, 1)) 70%);
+  width: 9px; height: 9px; border-radius: 50%; background: #0b0a10; border: 1.5px solid var(--c);
+  transition: width 0.35s var(--ease), height 0.35s var(--ease), background-color 0.35s, box-shadow 0.35s;
+}
+.tv-node[style] span { --c: hsl(var(--nh) 85% 70%); }
+.tv-node.is-away span { border-style: dashed; opacity: 0.6; }
+.tv-node.is-done span { background: var(--c); }
+.tv-node.is-on span { width: 13px; height: 13px; background: #fff; border-color: #fff; box-shadow: 0 0 0 3px var(--c), 0 0 16px var(--c); }
+.tv-node.is-on::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; border: 1px solid var(--c, var(--lav)); animation: ring 1.8s ease-out infinite; }
+.tv-node[style].is-on::after { border-color: hsl(var(--nh) 85% 70%); }
+.tv-node:hover span { transform: scale(1.25); }
+
+/* 위: 지금 이동하는 데이터 (모서리 괄호로 감싼 패킷) */
+.tv-data { position: relative; padding: 16px 16px 16px 18px; margin-bottom: 30px; }
+.tv-data::before, .tv-data::after { content: ''; position: absolute; width: 14px; height: 14px; border: 1.5px solid var(--lav-2); transition: border-color 0.4s; }
+.tv-data::before { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.tv-data::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.tv-data__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.tv-data__label { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.12em; color: var(--lav); }
+.tv-data__label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #fff, 0 0 12px var(--lav); }
+.tv-data__tag { font-family: ui-monospace, Consolas, monospace; font-size: 10.5px; letter-spacing: 0.18em; color: var(--muted); }
+.tv-data__value {
+  margin: 0 0 8px; font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 21px; font-weight: 600; line-height: 1.4;
+  color: var(--lav-hi); text-shadow: 0 0 18px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.6); word-break: break-word;
+}
+.tv-data__sub { margin: 0; font-size: 14px; color: var(--muted); }
+.tv-data.is-in .tv-data__label, .tv-data.is-in .tv-data__sub { animation: dataIn 0.5s var(--ease); }
+.tv-data.is-in .tv-data__label::before { animation: livePulse 0.4s 2; }
+
+/* 아래: 설명 (뒤에 큰 단계 번호) */
+.tv-step { position: relative; }
+.tv-step__n {
+  position: absolute; right: 0; top: -14px; font-size: 64px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; pointer-events: none;
+  color: transparent; -webkit-text-stroke: 1px hsl(var(--h) calc(95% * var(--sat)) 85% / 0.22);
+}
+.tv-step__title { position: relative; margin: 0 64px 12px 0; font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
+.tv-step__text { position: relative; margin: 0; min-height: 7.2em; font-size: 16px; line-height: 1.85; color: #c9c7d3; }
+.tv-step__text.is-typing::after {
+  content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -0.16em;
+  background: var(--lav-hi); box-shadow: 0 0 8px var(--lav); animation: caret 0.8s steps(1) infinite;
+}
+
+/* 넘기기: 원형 이전 · 단계 숫자 · 다음 */
+.tv-nav { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+.tv-count { flex: 1; font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: var(--muted); letter-spacing: 0.08em; }
+.tv-count b { color: var(--text); font-weight: 700; }
+.tv-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700;
+  color: var(--text); background: none; border: 1px solid var(--line); border-radius: 999px;
+  transition: color 0.25s, border-color 0.25s, background-color 0.25s, transform 0.25s var(--ease), box-shadow 0.3s;
+}
+.tv-btn--prev { width: 40px; padding: 0; }
+.tv-btn--prev:hover:not(:disabled) { border-color: var(--lav-2); transform: translateX(-2px); }
+.tv-btn:disabled { opacity: 0.25; cursor: default; }
+.tv-btn--next { padding: 0 14px 0 18px; color: #0b0a10; background: var(--lav); border-color: var(--lav); box-shadow: 0 0 22px -4px var(--lav-2); }
+.tv-btn--next:hover { transform: translateX(3px); box-shadow: 0 0 30px -2px var(--lav-2); }
+.tv-btn--next.is-away { background: #fff; border-color: #fff; }
+
+/* 장면 속 데이터 이동 선 */
+.tour-trail { pointer-events: none; }
+.tour-trail .journey__path { fill: none; stroke: var(--lav-hi); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px var(--lav)); }
+.tour-trail .journey__dot { fill: #fff; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px var(--lav)); }
+
+/* 첫 방문 안내 */
+.tour-tip {
+  position: absolute; left: 26px; right: 4px; bottom: 4px; z-index: 2; display: flex; flex-direction: column; gap: 6px; padding: 16px 16px 14px;
+  border-radius: 14px; background: hsl(var(--h) calc(30% * var(--sat)) 12% / 0.95); border: 1px solid var(--lav-2); box-shadow: 0 0 30px -8px var(--lav-2);
+  opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity 0.4s, transform 0.4s var(--ease);
+}
+.tour-tip.is-on { opacity: 1; transform: none; pointer-events: auto; }
+.tour-tip b { font-size: 15.5px; color: var(--lav-hi); }
+.tour-tip span { font-size: 14px; line-height: 1.6; color: #c9c7d3; }
+.tour-tip button {
+  align-self: flex-end; margin-top: 4px; height: 30px; padding: 0 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700;
+  color: #0b0a10; background: var(--lav); border: 0;
+}
+
+
+/* 다음 · 이전 버튼은 항상 패널 아래쪽 같은 자리에 (설명 길이에 따라 위아래로 움직이지 않게) */
+.tours__view { display: flex; flex-direction: column; }
+.tv-nav { margin-top: auto; position: sticky; bottom: 6px; padding: 18px 0 8px; background: linear-gradient(to top, hsl(0 0% 2%) 72%, hsl(0 0% 2% / 0)); z-index: 2; }
+@media (max-width: 1100px) {
+  .has-tours .hw-stage { padding-right: 312px; }
+  body.has-tours .board, body.has-tours.scene-page .board { width: min(calc(100vw - 330px), calc((100svh - 130px) * 1.81)); }
+  .tours { width: 272px; right: 16px; }
+  .has-tours .hint { right: 292px; }
+}
+@media (max-width: 760px) {
+  .has-tours .hw-stage { padding-right: 0; height: 56svh; }
+  body.has-tours .board, body.has-tours.scene-page .board { width: 600px; height: auto; margin-top: 64px; }
+  .has-tours .hint { right: 0; bottom: calc(42svh + 18px); padding: 0 16px; font-size: 12px; }
+  .tours {
+    top: auto; left: 8px; right: 8px; bottom: 8px; width: auto; height: 42svh; padding: 0;
+    border: 1px solid var(--line); border-radius: 18px; background: rgba(10, 9, 14, 0.94); backdrop-filter: blur(12px);
+  }
+  .tours::before { display: none; }
+  .tours__list, .tours__view { inset: 0; padding: 18px 18px 20px; margin-left: 0; }
+  .tours__title { font-size: 21px; }
+  .tv-step__text { min-height: 0; }
+  .tv-nav { position: sticky; bottom: -20px; margin: 18px -18px -20px; padding: 12px 18px 16px; background: linear-gradient(to top, rgba(10, 9, 14, 0.98) 70%, rgba(10, 9, 14, 0)); }
+  .tour-tip { left: 10px; right: 10px; bottom: 10px; }
+}
+@supports (display: block) {
+  html.kb-reduce .tv-where::before, html.kb-reduce .tours::before, html.kb-reduce .tv-node.is-on::after, html.kb-reduce .tour-item:hover .ti-route::after { animation: none; }
+}
+
+/* 화면 높이 안에 맞추기: 세로로 긴 장면(소프트웨어 보드 등)도 잘리지 않게 높이 상한을 둠
+   (그림은 비율을 유지한 채 이 상자 안에 맞춰짐) */
+body.has-tours .board, body.has-tours.scene-page .board { max-height: calc(100svh - 150px); }
+@media (max-width: 760px) { body.has-tours .board, body.has-tours.scene-page .board { max-height: none; } }
+
+/* ---------- 흐름: 출발 · 이동 · 도착 ---------- */
+/* 출발 맥박 · 도착 번쩍임은 tourpanel.js에서 별도 애니메이션으로 (부품 등장 애니메이션과 겹치지 않게) */
+/* 닿은 자리에서 퍼지는 물결 */
+.tour-ripple { fill: none; stroke: hsl(var(--th, var(--h)) 95% 82%); stroke-width: 2; vector-effect: non-scaling-stroke; animation: kbRipple 0.9s ease-out forwards; }
+@keyframes kbRipple { from { r: 4; opacity: 1; } to { r: 34; opacity: 0; } }
+/* 빛 점은 도착하면 사라짐 · 지나온 선은 흐리게 */
+.tour-trail .journey__dot { transition: opacity .25s, r .25s; }
+.tour-trail.is-done .journey__dot { opacity: 0; r: 0; }
+.tour-trail .journey__path { transition: opacity .6s; }
+.tour-trail.is-done .journey__path { opacity: 0.35; }
+/* 하드웨어: 굵은 배선 + 그 위를 달리는 빛 조각 */
+.tour-wire { fill: none; stroke: hsl(var(--th, var(--h)) 90% 70% / 0.55); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: .85; filter: drop-shadow(0 0 3px hsl(var(--th, var(--h)) 95% 70% / 0.6)); transition: opacity .6s; }
+.tour-bit { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 4px hsl(var(--th, var(--h)) 95% 80%)) drop-shadow(0 0 10px hsl(var(--th, var(--h)) 95% 65%)); }
+.tour-bit[data-k="1"] { opacity: .7; } .tour-bit[data-k="2"] { opacity: .45; }
+.tour-bit.is-gone { opacity: 0; transition: opacity .2s; }
+.tour-trail--wire.is-done .tour-wire { opacity: 0.4; }
+/* 하드웨어 장면: 흐름이 지나는 바닥 배선 (항상 흐리게 깔려 있음) */
+.auto-trace { fill: none; stroke: hsl(var(--h) calc(80% * var(--sat)) 72% / 0.28); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; pointer-events: none; }
+html.kb-reduce .tour-ripple { animation: none; }

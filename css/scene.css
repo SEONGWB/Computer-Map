@@ -1,0 +1,627 @@
+/* =========================================================
+   부품 안쪽 화면 공통 (네트워크, CPU, 메모리, 저장장치, GPU, 구조)
+   ========================================================= */
+.scene-page .board { width: min(96vw, calc((100svh - 130px) * 1.81)); }
+/* ---------- 상세 설명창 ---------- */
+.modal-open .board { transform: scale(0.96); filter: blur(3px) brightness(0.5); }
+.modal-open .sub-top, .modal-open .hint { opacity: 0.25 !important; transition: opacity 0.4s; }
+.part.is-flying { visibility: hidden; }
+
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 28px; }
+.modal[hidden] { display: none; }
+.modal__backdrop { position: absolute; inset: 0; background: rgba(4, 3, 10, 0.5); opacity: 0; transition: opacity 0.45s; }
+.modal.is-open .modal__backdrop { opacity: 1; }
+
+.modal__card {
+  position: relative; width: min(1040px, 100%); height: min(600px, calc(100svh - 56px));
+  display: grid; grid-template-columns: 1.15fr 1fr;
+}
+/* 카드 배경은 별도 층으로 페이드 (날아오는 그림은 페이드 없이 보이도록) */
+.modal__card::before {
+  content: ""; position: absolute; inset: 0; border-radius: 26px; pointer-events: none;
+  background: hsl(var(--h) calc(44% * var(--sat)) 8% / 0.88); border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.2);
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
+  opacity: 0; transform: scale(0.97); transition: opacity 0.4s ease, transform 0.6s var(--ease);
+}
+.modal.is-open .modal__card::before { opacity: 1; transform: none; }
+
+.modal__visual { position: relative; display: grid; place-items: center; min-height: 0; border-radius: 26px 0 0 26px; }
+.modal__visual::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(circle at 50% 55%, hsl(var(--h) calc(90% * var(--sat)) 66% / 0.3), hsl(var(--h) calc(90% * var(--sat)) 66% / 0.06) 45%, transparent 70%);
+  border-right: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.1); opacity: 0; transition: opacity 0.6s ease 0.15s;
+}
+.modal__grid {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 0.6s ease 0.2s;
+  background-image: linear-gradient(hsl(var(--h) calc(92% * var(--sat)) 76% / 0.08) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--h) calc(92% * var(--sat)) 76% / 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 75%); mask-image: radial-gradient(circle at 50% 50%, #000 30%, transparent 75%);
+}
+.modal.is-open .modal__visual::before, .modal.is-open .modal__grid { opacity: 1; }
+.modal__svg { position: relative; z-index: 2; width: 90%; height: 90%; overflow: visible; will-change: transform; }
+.modal__float { animation: bob 5s ease-in-out 0.9s infinite; }
+.modal.is-swap .modal__svg { animation: swapIn 0.5s var(--ease); }
+@keyframes swapIn { from { opacity: 0; transform: scale(0.92); } }
+.modal.is-closing .modal__visual::before, .modal.is-closing .modal__grid { transition-delay: 0s; transition-duration: 0.25s; }
+
+/* 설명창 안의 부품: 항상 강조 상태 */
+.modal-part { animation: none !important; opacity: 1 !important; cursor: default;
+  filter: drop-shadow(0 0 2px hsl(var(--h) calc(91% * var(--sat)) 95% / 0.85)) drop-shadow(0 0 16px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.7)) !important; }
+.modal-part .part__in { opacity: 1 !important; transform: none !important; animation: none !important; }
+.modal-part .ft { stroke: var(--lav-hi); }
+.modal-part .lift { transform: none !important; }
+
+.modal__body { position: relative; z-index: 1; padding: 52px 44px 36px 36px; overflow-y: auto; min-height: 0; }
+.modal__body > * { opacity: 0; transform: translateY(10px); }
+.modal.is-open .modal__body > * { animation: fadeUp 0.55s var(--ease) forwards; }
+.modal.is-open .modal__body > :nth-child(1) { animation-delay: 0.25s; }
+.modal.is-open .modal__body > :nth-child(2) { animation-delay: 0.3s; }
+.modal.is-open .modal__body > :nth-child(3) { animation-delay: 0.36s; }
+.modal.is-open .modal__body > :nth-child(4) { animation-delay: 0.42s; }
+.modal.is-open .modal__body > :nth-child(n+5) { animation-delay: 0.48s; }
+.modal.is-swap .modal__body > * { animation-delay: 0s !important; animation-duration: 0.4s; }
+.modal.is-closing .modal__body > * { opacity: 0; transition: opacity 0.2s; }
+.modal__en { margin: 0 0 10px; font-size: 12px; font-weight: 700; letter-spacing: 0.28em; color: var(--lav); }
+.modal__title { margin: 0 0 16px; font-size: clamp(28px, 3vw, 40px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.modal__desc { margin: 0 0 28px; color: hsl(var(--h) calc(20% * var(--sat)) 71%); line-height: 1.75; font-size: 15.5px; }
+.modal__chips { margin: -12px 0 28px; }
+.modal__label { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.08em; }
+.modal.is-open .panel__list li { animation: slideIn 0.5s var(--ease) forwards; animation-delay: calc(0.5s + var(--i) * 0.06s); }
+.modal.is-swap .panel__list li { animation-delay: calc(var(--i) * 0.05s); }
+/* ----- 분해·정렬된 조각 ----- */
+.xp-root { animation: none; }
+/* 분해: 조립된 덩어리 → 가운데(층은 아래)부터 차례로 갈라지고, 끝에서 살짝 튕기며 멈춤 */
+.xp { transition: transform 1.05s cubic-bezier(.3, 1.32, .5, 1), opacity 0.4s ease, filter 0.35s; }
+.is-exploding .xp { transform: translate(var(--fx, 0px), var(--fy, 0px)); }
+.is-exploded .xp { transform: none; transition-delay: calc(var(--o, 0) * 0.12s), 0s, 0s; }
+.xp-base { opacity: 0; transition: opacity 0.7s ease; }
+.is-exploded .xp-base { opacity: 1; }
+/* 라벨: 다 벌어진 뒤 선이 그어지고 번호·이름이 나타남 */
+.xp-label { opacity: 0; transition: opacity 0.35s ease; }
+.is-exploded .xp-label { opacity: 1; transition-delay: calc(0.85s + var(--d, 0) * 0.1s); }
+.xp-label path[pathLength] { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.45s ease; }
+.is-exploded .xp-label path[pathLength] { stroke-dashoffset: 0; transition-delay: calc(0.75s + var(--d, 0) * 0.1s); }
+.is-swap .xp-label path[pathLength] { transition-delay: calc(0.3s + var(--d, 0) * 0.08s); }
+.modal__svg { transition: opacity 0.4s; }
+.xp { cursor: pointer; }
+.xp.is-on { filter: drop-shadow(0 0 3px hsl(var(--h) calc(91% * var(--sat)) 95% / 0.95)) drop-shadow(0 0 16px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.9)); }
+.xp.is-on .ft { stroke: var(--lav-hi); fill: hsl(var(--h) calc(48% * var(--sat)) 32%); }
+.has-spot .xp:not(.is-on), .has-spot .xp-label:not(.is-on) { opacity: 0.32; transition-delay: 0s; }
+.is-exploded .xp.is-on { transition-delay: 0s; }
+.xp-label { cursor: pointer; }
+.xp-label circle { fill: hsl(var(--h) calc(51% * var(--sat)) 17%); stroke: var(--lav); stroke-width: 1.4; }
+.xp-label .num { font-size: 12px; font-weight: 800; fill: var(--lav-hi); text-anchor: middle; }
+.xp-label .ko { font-size: 13px; font-weight: 700; fill: var(--text); }
+.xp-label .en { font-size: 8px; font-weight: 700; letter-spacing: 0.16em; fill: var(--lav); }
+.xp-label.is-on circle { fill: var(--lav-2); }
+.xp-label.is-on .num { fill: #fff; }
+
+/* ----- 구성 목록 (분해 조각과 짝) ----- */
+.spot {
+  display: flex; align-items: center; gap: 14px; padding: 13px 8px; border-radius: 12px; cursor: pointer; outline: none;
+  transition: background-color 0.3s, padding 0.3s var(--ease), opacity 0.3s;
+}
+.spot .n { flex: none; width: 34px; font-size: 11px; font-weight: 800; color: var(--lav); letter-spacing: 0.06em; }
+.spot { flex-wrap: wrap; row-gap: 10px; }
+.spot__txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1 1 200px; }
+.spot__txt b { font-size: 15px; font-weight: 700; color: var(--text); transition: color 0.3s; }
+.spot__txt small { font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.spot.is-on { background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.16); padding-left: 14px; }
+.spot.is-on b { color: var(--lav-hi); }
+.has-spot .spot:not(.is-on) { opacity: 0.55; }
+.spot__action {
+  flex: none; margin-left: auto; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+  border-radius: 10px; border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35); background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.2); color: var(--lav-hi);
+  font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;
+  transition: background-color 0.3s, border-color 0.3s, transform 0.3s var(--ease);
+}
+.spot__action:hover { background: var(--lav-3); border-color: var(--lav); transform: translateX(3px); }
+.spot__action svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ----- 연결된 흐름 ----- */
+.flows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 26px; }
+.flow {
+  display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px 14px; text-align: left; cursor: pointer;
+  border-radius: 14px; border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.22); color: var(--text); font: inherit;
+  background: linear-gradient(90deg, hsl(var(--h) calc(90% * var(--sat)) 66% / 0.16), hsl(var(--h) calc(90% * var(--sat)) 66% / 0.04));
+  transition: border-color 0.3s, background-color 0.3s, transform 0.35s var(--ease);
+}
+.flow:hover, .flow:focus-visible { border-color: var(--lav); transform: translateX(4px); outline: none; background-color: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.14); }
+.flow__icon { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.25); color: var(--lav-hi); }
+.flow__icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.flow__icon circle { fill: currentColor; stroke: none; }
+.flow:hover .flow__icon circle { animation: flowDot 0.9s ease-in-out infinite; }
+@keyframes flowDot { 50% { transform: translateX(10px); } }
+.flow__txt { display: flex; flex-direction: column; gap: 2px; }
+.flow__txt b { font-size: 14.5px; font-weight: 700; }
+.flow__txt small { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* 도착 후 이어지는 흐름 */
+.arrival-nav {
+  position: fixed; left: 50%; bottom: 64px; z-index: 6; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  width: max-content; max-width: calc(100vw - 32px);
+  opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity 0.5s, transform 0.5s var(--ease);
+}
+.arrival-nav.is-on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.modal-open .arrival-nav { opacity: 0; pointer-events: none; }
+.arrival-btn {
+  display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 18px 0 8px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 700; color: var(--lav-hi); border: 1px solid var(--lav-2);
+  background: hsl(var(--h) calc(49% * var(--sat)) 17% / 0.85); backdrop-filter: blur(10px); box-shadow: 0 0 30px -6px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.7);
+  transition: background 0.3s, transform 0.3s var(--ease);
+}
+.arrival-btn span { padding: 4px 10px; border-radius: 999px; background: var(--lav-3); color: #fff; font-size: 12px; }
+.arrival-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.arrival-btn:hover { background: hsl(var(--h) calc(46% * var(--sat)) 42% / 0.9); }
+.arrival-btn--back { padding: 0 18px 0 14px; border-color: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35); box-shadow: none; color: var(--text); }
+.arrival-btn--back span { background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.25); color: var(--lav-hi); }
+.arrival-btn--back:hover { transform: translateX(-3px); }
+.arrival-btn--next:hover { transform: translateX(3px); }
+.spot__action--ghost { background: transparent; }
+.arrival-next {
+  position: fixed; left: 50%; bottom: 64px; z-index: 6; display: inline-flex; align-items: center; gap: 10px;
+  height: 44px; padding: 0 18px 0 8px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 14px; font-weight: 700;
+  color: var(--lav-hi); border: 1px solid var(--lav-2); background: hsl(var(--h) calc(49% * var(--sat)) 17% / 0.85); backdrop-filter: blur(10px);
+  box-shadow: 0 0 30px -6px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.7);
+  opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity 0.5s, transform 0.5s var(--ease);
+}
+.arrival-next.is-on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.arrival-next span { padding: 4px 10px; border-radius: 999px; background: var(--lav-3); color: #fff; font-size: 12px; }
+.arrival-next svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.arrival-next:hover { background: hsl(var(--h) calc(46% * var(--sat)) 42% / 0.9); }
+
+/* ----- 데이터 여정 도착 ----- */
+.arrival { pointer-events: none; transition: opacity 0.6s; }
+.arrival.is-done { opacity: 0; }
+.arrival .journey__path {
+  fill: none; stroke: var(--lav-hi); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100; stroke-dashoffset: 100; animation: drawPath 2.4s ease-in-out forwards; filter: drop-shadow(0 0 4px var(--lav));
+}
+.arrival .journey__dot { fill: #fff; filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 12px var(--lav)); }
+
+/* ----- 다른 화면으로 날아가는 데이터 ----- */
+.journey-dot {
+  position: fixed; z-index: 40; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; pointer-events: none;
+  background: #fff; box-shadow: 0 0 0 4px hsl(var(--h) calc(95% * var(--sat)) 85% / 0.45), 0 0 24px 8px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.8);
+  transition: transform 0.95s cubic-bezier(0.55, 0, 0.3, 1);
+}
+.journey-dot.go { transform: translate(var(--tx), var(--ty)) scale(0.6); }
+
+.modal__close {
+  position: absolute; top: 18px; right: 18px; z-index: 3; width: 38px; height: 38px; display: grid; place-items: center;
+  border-radius: 11px; border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.2); background: hsl(var(--h) calc(44% * var(--sat)) 8% / 0.6); color: var(--text); cursor: pointer;
+  opacity: 0; transition: opacity 0.3s 0.3s, border-color 0.3s, transform 0.3s var(--ease);
+}
+.modal.is-open .modal__close { opacity: 1; }
+.modal__close:hover { border-color: var(--lav); transform: rotate(90deg); }
+.modal__close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+
+/* 바닥 격자 */
+.floor path { fill: none; stroke: hsl(var(--h) calc(92% * var(--sat)) 76% / 0.14); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* 선 / 흐르는 신호 */
+.wire { fill: none; stroke: hsl(var(--h) calc(92% * var(--sat)) 76% / 0.45); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; transition: stroke 0.4s; }
+.wire--dash { stroke-dasharray: 3 5; }
+.packet {
+  fill: none; stroke: var(--lav-hi); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 3 97; animation: pulse 2.8s linear infinite; filter: drop-shadow(0 0 3px var(--lav));
+}
+.packet--fast { animation-duration: 1.2s; }
+
+/* 상호작용 없는 보조 그룹 (회로선 등) */
+.linked { pointer-events: none; transition: opacity 0.4s, filter 0.4s; }
+.linked.is-hot, .linked.is-sel, .linked.is-link, .linked.is-link-sel { filter: drop-shadow(0 0 4px hsl(var(--h) calc(95% * var(--sat)) 85% / 0.9)); }
+.linked.is-hot .wire, .linked.is-sel .wire, .linked.is-link .wire, .linked.is-link-sel .wire { stroke: var(--lav); }
+.linked.is-hot .packet, .linked.is-sel .packet { animation-duration: 1.1s; }
+.has-hot .linked:not(.is-hot):not(.is-sel):not(.is-link):not(.is-link-sel),
+.has-sel:not(.has-hot) .linked:not(.is-sel):not(.is-link-sel) { opacity: 0.3; }
+.has-hot .deco, .has-sel .deco { opacity: 0.3; }
+.deco { pointer-events: none; transition: opacity 0.4s; }
+.deco .ft { fill: hsl(var(--h) calc(42% * var(--sat)) 11%); stroke: hsl(var(--h) calc(92% * var(--sat)) 76% / 0.35); }
+.deco .fa, .deco .fb { stroke-opacity: 0.25; }
+
+/* 공통 디테일 */
+.dev-top { fill: hsl(var(--h) calc(49% * var(--sat)) 17%); }
+.led { fill: #a7f3d0; animation: led 1.4s steps(1) infinite; }
+@keyframes led { 50% { opacity: 0.25; } }
+.led-strip { fill: var(--lav); stroke: none !important; }
+.screen { fill: hsl(var(--h) calc(50% * var(--sat)) 34%); stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.6) !important; animation: screen 4s ease-in-out infinite; }
+@keyframes screen { 50% { fill: hsl(var(--h) calc(46% * var(--sat)) 42%); } }
+.keyboard { fill: hsl(var(--h) calc(45% * var(--sat)) 22%); }
+.port-hole { fill: #05040a; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.55) !important; stroke-width: 1; }
+.unit { fill: hsl(var(--h) calc(45% * var(--sat)) 11%); stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35) !important; stroke-width: 0.8; }
+.cell { fill: hsl(var(--h) calc(45% * var(--sat)) 22%); stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.cell--hi { fill: hsl(var(--h) calc(46% * var(--sat)) 42%); }
+.lbl { font-size: 9px; font-weight: 800; letter-spacing: 0.12em; fill: var(--lav); }
+.lbl--lg { font-size: 13px; }
+.lbl--dim { fill: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.5); }
+.gold { fill: #c9a24a; stroke: none !important; opacity: 0.85; }
+.stroke-lav { fill: none; stroke: var(--lav); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.stroke-dim { fill: none; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.45); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.fill-lav { fill: var(--lav); }
+.wave { fill: none; stroke: var(--lav); stroke-width: 1.6; stroke-linecap: round; opacity: 0; animation: wave 2.1s ease-out infinite; }
+
+/* 층 쌓기 (OSI 탑, 메모리 계층 등) */
+.layer-top { stroke: var(--lav-2); }
+.layer-num { font-size: 11px; font-weight: 800; fill: hsl(var(--h) calc(91% * var(--sat)) 95% / 0.8); letter-spacing: 0.05em; }
+.layer .fa, .layer .fb { stroke-opacity: 0.7; }
+.layer .hit, .part .hit { fill: transparent; stroke: none; pointer-events: all; }
+.layer .lift { pointer-events: none; transform-box: fill-box; transform-origin: 50% 50%; transition: transform 0.5s var(--ease); }
+.layer.is-hot, .layer.is-sel, .layer:focus-visible { transform: none; }
+.layer.is-hot .lift, .layer.is-sel .lift { transform: translate(-14px, -5px) scale(1.05); }
+
+/* 관련 항목 보조 강조 */
+.part.is-link, .part.is-link-sel {
+  animation: none; opacity: 1 !important;
+  filter: drop-shadow(0 0 2px hsl(var(--h) calc(91% * var(--sat)) 95% / 0.7)) drop-shadow(0 0 10px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.7)) !important;
+}
+.tag.is-link, .tag.is-link-sel, .ltag.is-link, .ltag.is-link-sel { opacity: 1 !important; }
+.tag.is-link .tag__ko, .tag.is-link-sel .tag__ko { fill: var(--lav); fill-opacity: 1; }
+
+/* 층 옆 라벨 */
+.ltag { cursor: pointer; transition: opacity 0.4s var(--ease); }
+.ltag__line { fill: none; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35); stroke-width: 1; transition: stroke 0.3s; }
+.ltag__n { font-size: 12px; font-weight: 800; fill: var(--lav); }
+.ltag__ko { font-size: 13px; font-weight: 700; fill: var(--text); fill-opacity: 0.75; transition: fill 0.3s, fill-opacity 0.3s; }
+.ltag__en { font-size: 8px; font-weight: 600; letter-spacing: 0.14em; fill: var(--muted); }
+.ltag.is-hot .ltag__ko, .ltag.is-sel .ltag__ko, .ltag.is-link .ltag__ko, .ltag.is-link-sel .ltag__ko { fill: var(--lav-hi); fill-opacity: 1; }
+.ltag.is-hot .ltag__line, .ltag.is-sel .ltag__line, .ltag.is-link .ltag__line { stroke: var(--lav); }
+.has-hot .ltag:not(.is-hot):not(.is-sel):not(.is-link), .has-sel:not(.has-hot) .ltag:not(.is-sel):not(.is-link-sel) { opacity: 0.3; }
+body:not(.is-entering) .ltag .tag__in { animation: fadeIn 0.6s ease forwards; animation-delay: calc(1.5s + var(--i) * 0.06s); }
+
+/* 패널 칩 */
+.panel__chips { display: flex; flex-wrap: wrap; gap: 6px; margin: -16px 0 28px; }
+.panel__chips:empty { display: none; }
+.panel__chips span {
+  font-size: 12px; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+  color: var(--lav-hi); background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.18); border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.25);
+}
+
+/* ---------- 네트워크 ---------- */
+.ap-dome { fill: hsl(var(--h) calc(45% * var(--sat)) 23%); stroke: var(--lav); stroke-width: 1.2; }
+.phone-screen { fill: hsl(var(--h) calc(50% * var(--sat)) 34%); }
+.globe-glow { fill: hsl(var(--h) calc(92% * var(--sat)) 76% / 0.12); }
+.globe { fill: hsl(var(--h) calc(52% * var(--sat)) 12%); stroke: var(--lav-2); stroke-width: 1.4; }
+.globe-lines { fill: none; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.45); stroke-width: 1; }
+.orbit { fill: none; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.35); stroke-width: 1; stroke-dasharray: 2 4; }
+.satellite { fill: var(--lav-hi); }
+
+/* ---------- CPU ---------- */
+.die { fill: hsl(var(--h) calc(49% * var(--sat)) 10%); }
+.core-plate { fill: hsl(var(--h) calc(50% * var(--sat)) 13%); }
+.core-block { fill: hsl(var(--h) calc(48% * var(--sat)) 20%); }
+.cache-top { fill: hsl(var(--h) calc(49% * var(--sat)) 25%); }
+.token { fill: var(--lav-hi); filter: drop-shadow(0 0 4px var(--lav)); }
+.clockwave { fill: none; stroke: var(--lav-hi); stroke-width: 2; stroke-linejoin: round; stroke-dasharray: 18 300; animation: clockrun 1.6s linear infinite; }
+@keyframes clockrun { from { stroke-dashoffset: 318; } to { stroke-dashoffset: 0; } }
+.blink { animation: blinkcell 2.4s ease-in-out infinite; }
+@keyframes blinkcell { 0%, 100% { fill: hsl(var(--h) calc(48% * var(--sat)) 20%); } 50% { fill: hsl(var(--h) calc(45% * var(--sat)) 50%); } }
+
+/* ---------- 저장장치 ---------- */
+.platter { fill: hsl(var(--h) calc(39% * var(--sat)) 23%); stroke: var(--lav-2); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.track { fill: none; stroke: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.3); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+.arm { fill: none; stroke: var(--lav-hi); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+
+@media (max-width: 760px) {
+  .scene-page .board { width: 820px; }
+  .modal { padding: 10px; }
+  .modal__card { grid-template-columns: 1fr; grid-template-rows: 38% 1fr; height: calc(100svh - 20px); }
+  .modal__visual { border-radius: 22px 22px 0 0; }
+  .modal__visual::before { border-right: 0; border-bottom: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.1); }
+  .modal__body { padding: 24px 22px 28px; }
+  .modal__title { font-size: 28px; }
+}
+
+/* ----- 설명 (상자 없이 글만, 넘김은 그림 양옆 화살표) ----- */
+.modal__body { padding: 60px 56px 40px 44px; }
+.modal__title { margin-bottom: 18px; }
+.modal__chips { margin: -4px 0 34px; }
+.modal__main { margin-bottom: 34px; }
+.card { position: relative; padding: 0 0 0 18px; border-left: 2px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.22); }
+.card::before {
+  content: ''; position: absolute; left: -2px; top: 0; width: 2px; height: 34px; background: var(--lav);
+  box-shadow: 0 0 10px var(--lav); border-radius: 2px;
+}
+.card.is-in .card__tag, .card.is-in .card__title, .card.is-in .card__acts { animation: cardIn 0.45s var(--ease); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 26px; margin-bottom: 8px; }
+.card__tag { font-size: 10.5px; font-weight: 800; letter-spacing: 0.2em; color: var(--lav); }
+.card__play {
+  flex: none; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.28); background: transparent; color: var(--lav-hi); opacity: 0.7;
+  transition: opacity 0.25s, background-color 0.25s, border-color 0.25s;
+}
+.card__play:hover { opacity: 1; border-color: var(--lav); background: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.18); }
+.card__play svg { width: 11px; height: 11px; fill: currentColor; }
+.card__play .i-pause, .is-playing .card__play .i-play { display: none; }
+.is-playing .card__play .i-pause { display: block; }
+.is-playing .card__play { opacity: 1; background: var(--lav-3); border-color: var(--lav); color: #fff; }
+.card__title { margin: 0 0 12px; font-size: 22px; font-weight: 800; letter-spacing: -0.01em; color: var(--text); }
+.card__text { margin: 0; min-height: 5.25em; font-size: 15.5px; line-height: 1.8; color: hsl(var(--h) calc(29% * var(--sat)) 80%); }
+.card__text.is-typing::after {
+  content: ''; display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -0.16em;
+  background: var(--lav-hi); box-shadow: 0 0 8px var(--lav); animation: caret 0.8s steps(1) infinite;
+}
+@keyframes caret { 50% { opacity: 0; } }
+.card__acts { display: flex; flex-wrap: wrap; gap: 8px; min-height: 30px; margin-top: 12px; align-items: center; }
+.card__acts .spot__action { margin-left: 0; height: 30px; }
+.card__hint { font-size: 12.5px; color: var(--muted); }
+.dots { display: flex; gap: 6px; margin-top: 18px; }
+.dot { width: 16px; height: 14px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.dot::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 6px; height: 2px; border-radius: 2px;
+  background: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.22); transition: background-color 0.3s, box-shadow 0.3s;
+}
+.dot:hover::before { background: hsl(var(--h) calc(95% * var(--sat)) 85% / 0.55); }
+.dot.is-on { width: 28px; }
+.dot.is-on::before { background: var(--lav); box-shadow: 0 0 8px var(--lav); }
+.dot { transition: width 0.35s var(--ease); }
+/* 그림 양옆 넘김 화살표 */
+.vnav {
+  position: absolute; top: 50%; z-index: 3; display: none; place-items: center; width: 44px; height: 64px; margin-top: -32px; padding: 0;
+  border: 0; background: none; color: var(--lav-hi); cursor: pointer; opacity: 0.45; transition: opacity 0.3s, transform 0.3s var(--ease);
+}
+.has-spots.is-open .vnav { display: grid; }
+.vnav--prev { left: 10px; }
+.vnav--next { right: 10px; }
+.vnav svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px hsl(var(--h) calc(92% * var(--sat)) 76% / 0.8)); }
+.vnav:hover { opacity: 1; }
+.vnav--prev:hover { transform: translateX(-3px); }
+.vnav--next:hover { transform: translateX(3px); }
+.vnav:disabled { opacity: 0.12; cursor: default; transform: none; }
+.more { margin-top: 4px; border-top: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.1); padding-top: 6px; }
+.more summary {
+  display: flex; align-items: center; gap: 6px; padding: 10px 0; cursor: pointer; list-style: none;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--muted); transition: color 0.25s;
+}
+.more summary::-webkit-details-marker { display: none; }
+.more summary em { font-style: normal; color: var(--lav); }
+.more summary::after { content: '+'; margin-left: auto; font-size: 18px; font-weight: 400; color: var(--lav); }
+.more[open] summary::after { content: '−'; }
+.more summary:hover { color: var(--text); }
+.more .panel__list li { opacity: 1; animation: none !important; transform: none; }
+@media (max-width: 760px) {
+  .modal__body { padding: 26px 22px 28px; }
+  .card__title { font-size: 20px; }
+  .card__text { min-height: 0; font-size: 15px; }
+  .vnav { width: 36px; }
+  .vnav--prev { left: 2px; } .vnav--next { right: 2px; }
+}
+
+/* 닫히거나 다른 화면으로 떠날 때 화살표도 함께 사라짐 */
+.modal.is-closing .vnav { opacity: 0 !important; transition: opacity 0.2s; }
+
+
+/* 개념 · 구조 표시 */
+.modal__kind {
+  display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 999px; vertical-align: 1px;
+  font-size: 10px; letter-spacing: 0.08em; color: var(--muted); border: 1px solid hsl(var(--h) calc(95% * var(--sat)) 85% / 0.25);
+}
+/* 네트워크: 내 컴퓨터 표시 */
+.here__pill { fill: hsl(var(--h) calc(90% * var(--sat)) 66% / 0.25); stroke: var(--lav); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.here__txt { font-size: 10px; font-weight: 800; fill: var(--lav-hi); text-anchor: middle; letter-spacing: 0.04em; }
+.here__line { stroke: var(--lav); stroke-width: 1; stroke-dasharray: 2 3; vector-effect: non-scaling-stroke; }
+
+/* ===== 소프트웨어 구조 시안 ===== */
+.sw-page .layer-top { fill: hsl(var(--h) calc(42% * var(--sat)) 40% / 0.2); }
+.sw-page .part[data-part="os"] .layer-top { fill: hsl(var(--h) calc(50% * var(--sat)) 34% / 0.22); }
+.sw-page .part[data-part="app"] .layer-top { fill: hsl(var(--h) calc(44% * var(--sat)) 52% / 0.18); }
+.pillar { fill: hsl(var(--h) calc(92% * var(--sat)) 76% / 0.16); }
+.sw-page .part .fa, .sw-page .part .fb { fill-opacity: 0.85; }
+.card-top { fill: hsl(var(--h) calc(49% * var(--sat)) 25%); }
+.sw-floor { opacity: 0.55; }
+/* 소프트웨어 바닥의 메인보드: 무채색 + 어둡게 → 실루엣만 */
+.sw-mb { filter: grayscale(1) brightness(0.55); opacity: 0.6; pointer-events: none; }
+.sw-mb .tag, .sw-mb .journey { display: none; }
+.sw-mb__lbl { fill: var(--muted); letter-spacing: 0.2em; }
+.pillar-lbl { opacity: 0; transition: opacity 0.3s; }
+.part.is-hot .pillar-lbl, .part.is-sel .pillar-lbl { opacity: 1; }
+
+/* 소프트웨어 보드: 판 위 층 이름, 기둥 라벨 */
+.plate-ko { font-size: 15px; font-weight: 800; fill: var(--lav-hi); }
+.plate-en { font-size: 8px; font-weight: 700; letter-spacing: 0.16em; fill: var(--lav); opacity: 0.8; }
+.tower-lbl { font-size: 9px; }
+.card-ko { font-size: 12px; font-weight: 800; fill: var(--lav-hi); }
+
+/* ---------- 설명 언어 전환 (C · Java · Python) ---------- */
+.langsw { position: fixed; top: 18px; right: 24px; z-index: 40; display: flex; align-items: center; gap: 4px; padding: 4px; border: 1px solid hsl(0 0% 100% / 0.12); border-radius: 99px; background: hsl(0 0% 6% / 0.8); backdrop-filter: blur(8px); }
+.langsw__lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: hsl(0 0% 70%); padding: 0 8px 0 10px; }
+.langsw button { font: inherit; font-size: 12px; font-weight: 700; color: hsl(0 0% 72%); background: none; border: 0; padding: 6px 12px; border-radius: 99px; cursor: pointer; transition: background .25s, color .25s; }
+.langsw button:hover { color: #fff; }
+.langsw button.is-on { background: hsl(0 0% 100% / 0.14); color: #fff; }
+@media (max-width: 760px) { .langsw { top: auto; bottom: 14px; right: 50%; transform: translateX(50%); } .langsw__lbl { display: none; } }
+/* 언어별로만 보이는 글자 */
+.l-c, .l-java, .l-python { display: none; }
+html[data-lang="c"] .l-c, html[data-lang="java"] .l-java, html[data-lang="python"] .l-python { display: inline; }
+/* 언어 · 실행 화면: C에는 없는 부품은 흐리게 */
+.part.na-c { transition: opacity .4s; }
+html[data-lang="c"] .part.na-c:not(.is-hot):not(.is-sel) { opacity: 0.28; animation: none; filter: none; }
+.na-note { font-size: 11px; font-weight: 700; fill: hsl(0 0% 85%); pointer-events: none; }
+/* 소프트웨어 보드: 언어 세 갈래 → 시스템 콜 허리 */
+.lanes { pointer-events: none; }
+.lane { pointer-events: auto; cursor: pointer; transition: opacity .4s; opacity: 0.22; }
+.lane__path { fill: none; stroke: hsl(0 0% 85% / 0.7); stroke-width: 2; stroke-dasharray: 3 5; vector-effect: non-scaling-stroke; }
+.lane__path--one { stroke: hsl(0 0% 92%); stroke-dasharray: none; stroke-width: 2.5; }
+.lane__pk { opacity: 0; }
+.lane__tag rect { fill: hsl(0 0% 8%); stroke: hsl(0 0% 80% / 0.5); }
+.lane__tag text { font-size: 11px; font-weight: 800; fill: #fff; }
+.lane__how { font-size: 10.5px; font-weight: 700; fill: hsl(0 0% 92%); }
+html[data-lang="c"] .lane--c, html[data-lang="java"] .lane--java, html[data-lang="python"] .lane--python { opacity: 1; }
+html[data-lang="c"] .lane--c .lane__path, html[data-lang="java"] .lane--java .lane__path, html[data-lang="python"] .lane--python .lane__path { stroke: #fff; stroke-dasharray: none; stroke-width: 2.5; }
+html[data-lang="c"] .lane--c .lane__pk, html[data-lang="java"] .lane--java .lane__pk, html[data-lang="python"] .lane--python .lane__pk { opacity: 1; }
+html[data-lang="c"] .lane--c .lane__tag rect, html[data-lang="java"] .lane--java .lane__tag rect, html[data-lang="python"] .lane--python .lane__tag rect { fill: #fff; }
+html[data-lang="c"] .lane--c .lane__tag text, html[data-lang="java"] .lane--java .lane__tag text, html[data-lang="python"] .lane--python .lane__tag text { fill: #111; }
+.lane:hover { opacity: 0.7; }
+.waist { fill: hsl(0 0% 100% / 0.12); stroke: #fff; stroke-width: 1.5; filter: drop-shadow(0 0 6px #fff8); }
+.waist__lbl { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; fill: #fff; }
+.has-hot .lanes, .has-sel .lanes { opacity: 0.35; }
+
+/* 판 위 언어 표시 */
+.plate-lang { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; fill: var(--lav); }
+.plate-lang--same { fill: var(--lav-hi); }
+/* 전환 버튼: 언어마다 자기 색 */
+.langsw button[data-lang="c"].is-on { background: hsl(48 90% 52%); color: #1a1600; }
+.langsw button[data-lang="java"].is-on { background: hsl(16 85% 55%); }
+.langsw button[data-lang="python"].is-on { background: hsl(212 80% 55%); }
+.part[data-part="app"] .ft, .part[data-part="runtime"] .ft, .part[data-part="app"] *, .part[data-part="runtime"] * { transition: fill .5s, stroke .5s; }
+
+/* 밝은 회색 영역 (운영체제): 흰색에 가까운 판 + 어두운 글자 (장식으로 깐 바닥은 제외) */
+.part.is-neutral .ft, .is-neutral .part .ft { fill: hsl(0 0% 76%); stroke: hsl(0 0% 98%); }
+.part.is-neutral .ft.cache-top, .is-neutral .part .ft.cache-top { fill: hsl(0 0% 88%); }
+.part.is-neutral .fa, .is-neutral .part .fa { fill: hsl(0 0% 58%); stroke: hsl(0 0% 96%); stroke-opacity: 0.7; }
+.part.is-neutral .fb, .is-neutral .part .fb { fill: hsl(0 0% 46%); stroke: hsl(0 0% 96%); stroke-opacity: 0.7; }
+.sw-page .part.is-neutral .ft.layer-top, .sw-page.is-neutral .part .ft.layer-top { fill: hsl(0 0% 86% / 0.3); stroke: hsl(0 0% 98%); }
+.part.is-neutral .lbl, .is-neutral .part .lbl, .part.is-neutral .layer-num { fill: hsl(0 0% 14%); }
+.part.is-neutral .lbl--dim, .is-neutral .part .lbl--dim { fill: hsl(0 0% 26%); }
+.part.is-neutral .plate-ko, .part.is-neutral .plate-en, .part.is-neutral .plate-lang--same { fill: hsl(0 0% 97%); }
+.part.is-neutral .cell, .is-neutral .part .cell { fill: hsl(0 0% 60%); stroke: hsl(0 0% 35% / 0.5); }
+.part.is-neutral .cell--hi, .is-neutral .part .cell--hi { fill: hsl(0 0% 32%); }
+.part.is-neutral .stroke-dim, .part.is-neutral .stroke-lav, .is-neutral .part .stroke-dim, .is-neutral .part .stroke-lav { stroke: hsl(0 0% 22%); }
+.part.is-neutral .fill-lav, .is-neutral .part .fill-lav { fill: hsl(0 0% 20%); }
+
+/* 소프트웨어 보드: 강조된 층 주변이 밀려남 (보이는 그림만 움직이고, 마우스 영역은 고정) */
+.part.sw-layer .lift { pointer-events: none; transition: transform 0.45s var(--ease); }
+.part.sw-layer.is-hot, .part.sw-layer.is-sel { transform: none; }
+
+/* 운영체제: 관리되는 자원 판 */
+.ft.res-plate { fill: hsl(var(--h) calc(30% * var(--sat)) 12% / 0.85); stroke: hsl(var(--h) calc(80% * var(--sat)) 70% / 0.5); }
+.res-free { fill: hsl(var(--h) calc(30% * var(--sat)) 16%); stroke: hsl(var(--h) calc(70% * var(--sat)) 60% / 0.25); stroke-width: 0.6; }
+.res-file { fill: hsl(22 80% 58%); }
+.ft.res-dev { fill: hsl(var(--h) calc(30% * var(--sat)) 22%); }
+.res-now { fill: none; stroke: #fff; stroke-width: 1.4; filter: drop-shadow(0 0 4px #fff); }
+.res-ko { font-size: 11px; font-weight: 800; fill: var(--lav-hi); }
+.res-en { font-size: 7px; font-weight: 700; letter-spacing: 0.14em; fill: var(--lav); opacity: 0.75; }
+.res-en--dev { font-size: 9px; opacity: 1; }
+.linked.os-res { opacity: 0.75; }
+.linked.os-res.is-hot, .linked.os-res.is-sel, .linked.os-res.is-link, .linked.os-res.is-link-sel { opacity: 1; }
+.pt-link { fill: none; stroke: hsl(22 85% 62% / 0.55); stroke-width: 1.2; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.linked.os-pt { opacity: 0.35; }
+.linked.os-pt.is-hot, .linked.os-pt.is-sel { opacity: 1; }
+.linked.os-pt.is-hot .pt-link, .linked.os-pt.is-sel .pt-link { stroke: hsl(22 90% 66%); stroke-width: 1.6; }
+
+/* 설명 언어를 바꾸는 순간: 색이 부드럽게 넘어가게 (0.9초 동안만 켜짐) */
+html.lang-anim *, html.lang-anim *::before, html.lang-anim *::after {
+  transition: fill 0.7s var(--ease), stroke 0.7s var(--ease), color 0.7s var(--ease), background-color 0.7s var(--ease),
+    border-color 0.7s var(--ease), box-shadow 0.7s var(--ease), filter 0.7s var(--ease), stop-color 0.7s var(--ease) !important;
+}
+
+/* 운영체제 · 정면 평면: RAM 상자 안에 프로세스와 커널 */
+.ofl-ram { fill: hsl(var(--h) calc(35% * var(--sat)) 7% / 0.9); stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.55); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.ofl-title { font-size: 20px; font-weight: 900; letter-spacing: 0.06em; fill: var(--lav-hi); }
+.ofl-sub { font-size: 11px; font-weight: 600; fill: var(--lav); opacity: 0.8; }
+.ofl-zone { font-size: 9px; font-weight: 800; letter-spacing: 0.16em; fill: var(--lav); opacity: 0.7; }
+.ofl-free { fill: none; stroke: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.35); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.ofl-free-t { fill: var(--lav); opacity: 0.6; }
+.ofl-proc { fill: hsl(var(--h) calc(25% * var(--sat)) 10%); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.ofl-pname { font-size: 13px; font-weight: 800; }
+.ofl-seg-t { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; fill: #fff; opacity: 0.92; pointer-events: none; }
+.ofl-seg-k { font-size: 9.5px; font-weight: 600; fill: hsl(0 0% 100% / 0.7); pointer-events: none; }
+.ofl-grow { fill: none; stroke: hsl(0 0% 100% / 0.35); stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.ofl-border { fill: none; stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.6); stroke-width: 1.4; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
+.ofl-gate { fill: hsl(var(--h) calc(55% * var(--sat)) 18%); stroke: hsl(var(--h) calc(85% * var(--sat)) 68%); stroke-width: 1.3; vector-effect: non-scaling-stroke; }
+.ofl-gate-t { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; fill: var(--lav-hi); }
+.ofl-k { fill: hsl(var(--h) calc(45% * var(--sat)) 14%); stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.45); stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: fill .3s, stroke .3s; }
+.part.is-hot .ofl-k, .part.is-sel .ofl-k { fill: hsl(var(--h) calc(55% * var(--sat)) 20%); stroke: var(--lav-2); }
+.part.is-hot .ofl-proc, .part.is-sel .ofl-proc { fill: hsl(var(--h) calc(30% * var(--sat)) 14%); }
+.ofl-k-en { font-size: 11px; font-weight: 900; letter-spacing: 0.08em; fill: var(--lav-hi); }
+.ofl-k-ko { font-size: 9.5px; font-weight: 600; fill: var(--lav); opacity: 0.8; }
+.ofl-q { font-size: 9px; font-weight: 800; fill: #fff; pointer-events: none; }
+.ofl-cell { fill: hsl(var(--h) calc(30% * var(--sat)) 24%); }
+.ofl-cell--on { fill: hsl(22 78% 52%); }
+.ofl-cache { fill: hsl(22 78% 46%); }
+.ofl-drv { fill: var(--lav); font-weight: 800; letter-spacing: 0.06em; }
+.ofl-dev { fill: hsl(var(--h) calc(25% * var(--sat)) 11%); stroke: hsl(var(--h) calc(70% * var(--sat)) 64% / 0.45); stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+.ofl-dev-t { font-size: 12px; font-weight: 900; letter-spacing: 0.1em; fill: var(--lav-hi); }
+.ofl-run { fill: none; stroke: #fff; stroke-width: 1.6; stroke-dasharray: 5 4; filter: drop-shadow(0 0 5px hsl(0 0% 100% / 0.6)); vector-effect: non-scaling-stroke; }
+.ofl-run-t { font-size: 9.5px; font-weight: 800; fill: #fff; letter-spacing: 0.04em; }
+.linked.os-res, .linked.ofl-call, .linked.ofl-scatter { pointer-events: none; }
+.linked.ofl-call { opacity: 0.55; }
+.linked.ofl-call.is-hot, .linked.ofl-call.is-sel { opacity: 1; }
+/* 메모리 관리를 가리킬 때만 덮이는 '실제 모습' */
+.linked.ofl-scatter { transition: opacity .45s var(--ease); }
+#board .linked.ofl-scatter:not(.is-hot):not(.is-sel) { opacity: 0; }
+.linked.ofl-scatter.is-hot, .linked.ofl-scatter.is-sel { opacity: 1; }
+.ofl-scatter-bg { fill: hsl(var(--h) calc(35% * var(--sat)) 7%); }
+.ofl-pill { fill: hsl(var(--h) calc(55% * var(--sat)) 18%); stroke: hsl(var(--h) calc(85% * var(--sat)) 68% / 0.7); vector-effect: non-scaling-stroke; }
+.ofl-pill-t { font-size: 10.5px; font-weight: 700; fill: var(--lav-hi); }
+
+/* 언어 · 실행 · 정면 평면 */
+.rtf-arrow { fill: none; stroke: hsl(var(--h) calc(80% * var(--sat)) 70% / 0.7); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.rtf-head { fill: hsl(var(--h) calc(80% * var(--sat)) 72%); stroke: none; }
+.rtf-code { font: 600 11px ui-monospace, Consolas, monospace; fill: var(--lav-hi); }
+.rtf-big { font-size: 15px; font-weight: 800; fill: var(--lav-hi); }
+.ft.rtf-region, .rtf-region { fill: hsl(var(--h) calc(30% * var(--sat)) 10%); stroke: hsl(var(--h) calc(70% * var(--sat)) 64% / 0.4); stroke-dasharray: 4 3; stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+.linked.rtf-code-area { opacity: 1; }
+.rtf-jit { fill: hsl(var(--h) calc(80% * var(--sat)) 46%); }
+.rtf-frame { fill: hsl(var(--h) calc(45% * var(--sat)) 16%); stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.5); stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+.rtf-var { fill: hsl(var(--h) calc(30% * var(--sat)) 9%); }
+.rtf-dot { fill: hsl(var(--h) calc(85% * var(--sat)) 72%); }
+.rtf-ref { fill: none; stroke: hsl(var(--h) calc(85% * var(--sat)) 72% / 0.75); stroke-width: 1.3; vector-effect: non-scaling-stroke; }
+.rtf-obj { fill: hsl(var(--h) calc(55% * var(--sat)) 30%); stroke: hsl(var(--h) calc(85% * var(--sat)) 70% / 0.6); stroke-width: 1.1; vector-effect: non-scaling-stroke; }
+.rtf-leak { fill: hsl(0 55% 22%); stroke: hsl(0 80% 62%); stroke-dasharray: 5 4; }
+.rtf-dead { fill: hsl(0 0% 20%); stroke: hsl(0 0% 60% / 0.6); stroke-dasharray: 4 3; }
+.rtf-gen { fill: none; stroke: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.35); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.rtf-note { font-size: 10.5px; }
+.part.is-hot .rtf-frame, .part.is-sel .rtf-frame { fill: hsl(var(--h) calc(50% * var(--sat)) 22%); }
+.linked.rtf-garbage { opacity: 0.85; }
+.linked.rtf-garbage.is-hot .rtf-dead { stroke: #fff; }
+/* C에는 실행 엔진 · GC가 없으니 언어 · 실행 화면에서 아예 빼기 */
+html[data-lang="c"] .part[data-part="vm"], html[data-lang="c"] .part[data-part="gc"] { display: none; }
+
+/* 코드 영역: 지금 실행 중인 명령 표시 */
+.rtf-pc { fill: none; stroke: #fff; stroke-width: 1.6; filter: drop-shadow(0 0 4px hsl(0 0% 100% / 0.7)); vector-effect: non-scaling-stroke; pointer-events: none; }
+.part.is-hot .rtf-region, .part.is-sel .rtf-region { fill: hsl(var(--h) calc(45% * var(--sat)) 16%); stroke: var(--lav-2); stroke-dasharray: none; }
+
+/* 응용 프로그램 · 메모 앱 실습 */
+.app-win { fill: hsl(var(--h) calc(25% * var(--sat)) 9%); stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.55); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.app-bar { fill: hsl(var(--h) calc(40% * var(--sat)) 16%); }
+.app-dot { fill: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.6); }
+.app-edit { fill: hsl(0 0% 100% / 0.04); stroke: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.25); vector-effect: non-scaling-stroke; }
+.app-memo { font-size: 14px; font-weight: 600; fill: hsl(0 0% 100% / 0.85); }
+.app-caret { fill: var(--lav-hi); }
+.app-sep { stroke: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.25); vector-effect: non-scaling-stroke; }
+.app-btn { cursor: pointer; }
+.app-btn__bg { fill: hsl(var(--h) calc(85% * var(--sat)) 52%); transition: fill .2s, transform .15s; transform-box: fill-box; transform-origin: center; }
+.app-btn:hover .app-btn__bg { fill: hsl(var(--h) calc(90% * var(--sat)) 60%); }
+.app-btn.is-pressed .app-btn__bg { transform: scale(0.94); }
+.app-btn__t { font-size: 14px; font-weight: 800; fill: #fff; pointer-events: none; }
+.app-btn__ring { fill: none; stroke: hsl(var(--h) calc(90% * var(--sat)) 70%); stroke-width: 1.5; vector-effect: non-scaling-stroke; animation: appRing 1.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes appRing { 0% { opacity: .9; transform: scale(.94); } 100% { opacity: 0; transform: scale(1.12); } }
+.app-running .app-btn__ring, .app-running .app-try { opacity: 0; animation: none; }
+.app-try { font-size: 11px; font-weight: 700; fill: var(--lav); transition: opacity .3s; }
+.app-slot { fill: none; stroke: hsl(var(--h) calc(60% * var(--sat)) 60% / 0.35); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.app-ev { opacity: 0; transition: opacity .35s, transform .6s var(--ease); }
+.app-ev rect { fill: hsl(var(--h) calc(85% * var(--sat)) 52%); }
+.app-ev text { font-size: 10px; font-weight: 800; fill: #fff; }
+.app-ev.is-in { opacity: 1; transform: translateX(88px); }
+.app-ev.is-out { opacity: 0; transform: translateX(-60px); }
+.app-val { font: 600 11.5px ui-monospace, Consolas, monospace; fill: var(--lav-hi); }
+.app-val.is-flash { animation: appFlash 1s ease-out; }
+@keyframes appFlash { 0% { fill: #fff; } 30% { fill: hsl(48 100% 70%); } 100% { fill: var(--lav-hi); } }
+.ft.app-codebox, .app-codebox { fill: hsl(var(--h) calc(25% * var(--sat)) 7%); stroke: hsl(var(--h) calc(80% * var(--sat)) 66% / 0.5); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.app-code { font: 500 12.5px ui-monospace, Consolas, monospace; fill: hsl(0 0% 100% / 0.82); white-space: pre; pointer-events: none; }
+.app-ln { font: 500 10px ui-monospace, Consolas, monospace; fill: var(--lav); opacity: 0.5; pointer-events: none; }
+.app-hl { fill: hsl(var(--h) calc(85% * var(--sat)) 55% / 0.28); stroke: hsl(var(--h) calc(90% * var(--sat)) 70%); stroke-width: 1.2; vector-effect: non-scaling-stroke; opacity: 0; transition: y .45s var(--ease), opacity .3s, fill .3s, stroke .3s; }
+.app-hl.is-on { opacity: 1; }
+.app-hl.is-worker { fill: hsl(166 70% 45% / 0.25); stroke: hsl(166 75% 60%); }
+.app-tag { opacity: 0; transition: transform .45s var(--ease), opacity .3s; }
+.app-tag.is-on { opacity: 1; }
+.app-tag rect { fill: hsl(var(--h) calc(85% * var(--sat)) 52%); }
+.app-tag.is-worker rect { fill: hsl(166 70% 40%); }
+.app-tag text { font-size: 10px; font-weight: 800; fill: #fff; }
+.app-io__bg { fill: hsl(var(--h) calc(30% * var(--sat)) 11%); stroke: hsl(var(--h) calc(70% * var(--sat)) 60% / 0.3); vector-effect: non-scaling-stroke; transition: fill .3s, stroke .3s; }
+.app-io .app-io__pk { opacity: 0; }
+.app-io.is-on .app-io__bg { fill: hsl(166 50% 18%); stroke: hsl(166 75% 60%); }
+.app-io.is-on .app-io__pk { opacity: 1; }
+.app-io.is-done .app-io__bg { stroke: hsl(166 75% 60% / 0.5); }
+
+/* 평면 장면(운영체제 · 언어 · 실행 · 응용 프로그램): 강조할 때 떠오르기 · 확대 없이 빛만 */
+.is-flat .part.is-hot > .vis, .is-flat .part.is-sel > .vis, .is-flat .part:focus-visible > .vis { transform: none; }
+
+/* 도착해서 열린 설명창: 맨 위의 '방금 도착' 안내 */
+.arrive-box { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; border: 1px solid hsl(var(--h) calc(90% * var(--sat)) 70% / 0.35); background: hsl(var(--h) calc(60% * var(--sat)) 40% / 0.1); animation: dataIn 0.6s var(--ease); }
+.arrive-box .modal__label { margin-top: 0; }
+.arrive-box__txt { margin: 4px 0 10px; font-size: 13.5px; line-height: 1.6; color: #d6d4de; }
+.arrive-box__btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.arrive-box__btns .spot__action { margin: 0; }

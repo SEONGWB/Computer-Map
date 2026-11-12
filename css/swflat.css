@@ -1,0 +1,31 @@
+/* 소프트웨어 평면 시안 */
+.fl-band { fill: hsl(var(--h) calc(45% * var(--sat)) 9%); stroke: hsl(var(--h) calc(90% * var(--sat)) 70% / 0.45); stroke-width: 1.2; vector-effect: non-scaling-stroke; transition: fill .4s, stroke .4s; }
+.fl-accent { fill: hsl(var(--h) calc(90% * var(--sat)) 66%); }
+.fl-ko { font-size: 19px; font-weight: 800; fill: var(--lav-hi); letter-spacing: -0.01em; }
+.fl-ko--sm { font-size: 15px; }
+.fl-en { font-size: 8.5px; font-weight: 700; letter-spacing: 0.18em; fill: var(--lav); opacity: 0.7; }
+.fl-tile { fill: hsl(var(--h) calc(45% * var(--sat)) 15%); stroke: hsl(var(--h) calc(90% * var(--sat)) 70% / 0.25); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.fl-tile-en { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; fill: var(--lav); }
+.fl-tile-ko { font-size: 10px; font-weight: 500; fill: hsl(var(--h) calc(30% * var(--sat)) 85% / 0.65); }
+.fl-seg--hw { fill: hsl(0 0% 14%); stroke: hsl(0 0% 60% / 0.25); }
+.fl-spine { fill: none; stroke: hsl(var(--h) calc(90% * var(--sat)) 70% / 0.3); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.fl-arrow { fill: none; stroke: hsl(0 0% 80% / 0.6); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.fl-call { font-size: 10px; font-weight: 600; fill: hsl(0 0% 85% / 0.6); }
+.part.is-hot .fl-band, .part.is-sel .fl-band { fill: hsl(var(--h) calc(50% * var(--sat)) 13%); stroke: var(--lav-2); }
+.sw-flat .part { transform-origin: 50% 50%; }
+
+/* 하드웨어 띠 */
+.fl-hw { cursor: pointer; opacity: 0.75; transition: opacity .3s; }
+.fl-hw:hover { opacity: 1; }
+.fl-hw__band { fill: hsl(0 0% 9%); stroke: hsl(0 0% 60% / 0.3); stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.fl-hw__ko { font-size: 15px; font-weight: 800; fill: hsl(0 0% 75%); }
+.fl-hw__en { fill: hsl(0 0% 60%); }
+.fl-hw__chip { fill: hsl(0 0% 15%); stroke: hsl(0 0% 60% / 0.35); vector-effect: non-scaling-stroke; }
+.fl-hw__chipt { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; fill: hsl(0 0% 70%); }
+.fl-hw__go { font-size: 11px; font-weight: 600; fill: hsl(0 0% 65%); }
+.has-hot .fl-hw, .has-sel .fl-hw { opacity: 0.3; }
+
+/* 기초 제목 */
+.fl-fcap path { stroke: hsl(0 0% 70% / 0.25); stroke-dasharray: 3 5; vector-effect: non-scaling-stroke; }
+.fl-fcap text { font-size: 10px; font-weight: 700; letter-spacing: 0.16em; fill: hsl(0 0% 75% / 0.6); }
+.has-hot .fl-fcap, .has-sel .fl-fcap { opacity: 0.3; }

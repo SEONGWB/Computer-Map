@@ -1,0 +1,105 @@
+/* 소프트웨어 시안 비교 페이지 */
+body.lab { overflow: auto; }
+.lab__top { display: flex; align-items: center; gap: 28px; padding: 22px 32px 10px; flex-wrap: wrap; }
+.lab__back { color: var(--muted, #9a9aa5); text-decoration: none; font-size: 13px; border: 1px solid #ffffff22; padding: 7px 12px; border-radius: 99px; }
+.lab__back:hover { color: #fff; border-color: #ffffff55; }
+.lab__eyebrow { margin: 0; font-size: 10px; letter-spacing: .24em; color: #8b8b96; font-weight: 700; }
+.lab h1 { margin: 2px 0 0; font-size: 20px; font-weight: 800; color: #f2f2f5; }
+.lab__tabs { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.lab__tab { font: inherit; font-size: 13px; font-weight: 700; color: #b8b8c2; background: #ffffff08; border: 1px solid #ffffff1c; padding: 9px 14px; border-radius: 10px; cursor: pointer; transition: all .25s; }
+.lab__tab b { color: #fff; margin-right: 6px; }
+.lab__tab:hover { border-color: #ffffff44; color: #fff; }
+.lab__tab.is-on { background: #ffffff16; border-color: #ffffff66; color: #fff; }
+.lab__main { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; padding: 6px 32px 28px; align-items: start; }
+.lab__svg { width: 100%; height: auto; max-height: calc(100svh - 120px); display: block; }
+.lab__note { background: #ffffff06; border: 1px solid #ffffff16; border-radius: 16px; padding: 18px 18px 8px; font-size: 13px; line-height: 1.65; color: #c9c9d2; }
+.lab__note h2 { margin: 0 0 4px; font-size: 16px; color: #fff; }
+.lab__note .sub { margin: 0 0 12px; color: #8f8f9a; font-size: 12px; }
+.lab__note h3 { margin: 14px 0 4px; font-size: 11px; letter-spacing: .16em; color: #8f8f9a; }
+.lab__note ul { margin: 0; padding-left: 16px; }
+.lab__note li { margin: 3px 0; }
+.lab__note .pro li::marker { color: #6ee7b7; }
+.lab__note .con li::marker { color: #fca5a5; }
+@media (max-width: 1000px) { .lab__main { grid-template-columns: 1fr; } }
+
+/* 그림 공통 (--h: 그 영역의 색) */
+.lab__svg text { font-family: inherit; }
+.g { transition: opacity .35s; }
+.lab__svg.hot .g:not(.on) { opacity: .22; }
+.g[data-k] { cursor: pointer; }
+.bd { fill: hsl(var(--h) 40% 9%); stroke: hsl(var(--h) 85% 68% / .5); stroke-width: 1.2; }
+.g.on .bd { fill: hsl(var(--h) 45% 13%); stroke: hsl(var(--h) 90% 75%); }
+.ac { fill: hsl(var(--h) 90% 66%); }
+.ko { font-size: 19px; font-weight: 800; fill: hsl(var(--h) 90% 93%); }
+.ko.sm { font-size: 15px; }
+.en { font-size: 8.5px; font-weight: 700; letter-spacing: .18em; fill: hsl(var(--h) 90% 80% / .7); }
+.tl { fill: hsl(var(--h) 45% 15%); stroke: hsl(var(--h) 85% 70% / .25); }
+.te { font-size: 10px; font-weight: 800; letter-spacing: .08em; fill: hsl(var(--h) 90% 82%); }
+.tk { font-size: 10px; font-weight: 500; fill: hsl(var(--h) 30% 85% / .65); }
+.gray .bd, .bd.gray { fill: hsl(0 0% 9%); stroke: hsl(0 0% 60% / .3); stroke-dasharray: 4 4; }
+.gray .ko { fill: hsl(0 0% 75%); } .gray .en { fill: hsl(0 0% 60%); }
+.gray .tl { fill: hsl(0 0% 15%); stroke: hsl(0 0% 60% / .3); } .gray .te { fill: hsl(0 0% 72%); } .gray .tk { fill: hsl(0 0% 60%); }
+.wr { fill: none; stroke: hsl(0 0% 80% / .3); stroke-width: 1.4; stroke-dasharray: 3 5; }
+.pk { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 3 97; animation: lbmove 2.8s linear infinite; filter: drop-shadow(0 0 3px #fff); }
+@keyframes lbmove { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+.call { font-size: 10px; font-weight: 600; fill: hsl(0 0% 85% / .6); }
+.arw { fill: none; stroke: hsl(0 0% 85% / .6); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.cap { font-size: 10px; font-weight: 700; letter-spacing: .16em; fill: hsl(0 0% 75% / .65); }
+
+/* 자료구조 렌즈 배지 */
+.badge rect { fill: hsl(62 80% 55% / .16); stroke: hsl(62 90% 65% / .7); }
+.badge text { font-size: 8.5px; font-weight: 700; fill: hsl(62 95% 78%); }
+/* 보안 테두리·자물쇠 */
+.frame { fill: none; stroke: hsl(0 85% 68% / .55); stroke-width: 1.5; stroke-dasharray: 8 6; }
+.g.on .frame { stroke: hsl(0 90% 75%); filter: drop-shadow(0 0 6px hsl(0 90% 60% / .6)); }
+.lock rect, .lock path { fill: hsl(0 50% 12%); stroke: hsl(0 90% 72%); stroke-width: 1.3; }
+.lock text { font-size: 8.5px; font-weight: 700; fill: hsl(0 90% 82%); }
+.flabel { font-size: 11px; font-weight: 800; fill: hsl(0 90% 82%); }
+.flabel-bg { fill: var(--bg, #08080b); }
+/* 공학 일정 */
+.chev { fill: hsl(228 45% 13%); stroke: hsl(228 85% 70% / .5); stroke-width: 1.2; }
+.g.on .chev { stroke: hsl(228 90% 78%); fill: hsl(228 50% 17%); }
+.chev-t { font-size: 13px; font-weight: 800; fill: hsl(228 90% 92%); }
+.chev-e { font-size: 8px; font-weight: 700; letter-spacing: .16em; fill: hsl(228 90% 80% / .7); }
+/* 일정 배경 (B) */
+.gantt-col { fill: hsl(228 40% 50% / .05); }
+.gantt-line { stroke: hsl(228 70% 70% / .18); stroke-dasharray: 2 6; }
+.gantt-bar { fill: hsl(228 70% 60% / .12); }
+.gantt-h { font-size: 11px; font-weight: 800; fill: hsl(228 80% 82% / .7); letter-spacing: .06em; }
+/* 동심원 (C) */
+.ring { stroke-width: 1.2; }
+.wedge { fill: hsl(var(--h) 80% 55% / .13); stroke: hsl(var(--h) 85% 68% / .6); stroke-width: 1.2; }
+.g.on .wedge { fill: hsl(var(--h) 80% 55% / .25); }
+/* 노선 (D) */
+.lane { fill: hsl(var(--h) 40% 50% / .05); stroke: hsl(var(--h) 80% 70% / .18); }
+.route { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.stn { fill: #0b0b10; stroke-width: 2.5; }
+.stn-t { font-size: 10.5px; font-weight: 700; fill: #e9e9ef; }
+.stn-s { font-size: 9px; fill: #9a9aa6; }
+.tagc { font-size: 8px; font-weight: 800; letter-spacing: .1em; }
+
+/* E 건물 */
+.ground { fill: hsl(0 0% 6%); }
+.groundline { stroke: hsl(0 0% 60% / .4); stroke-width: 1.5; }
+.roof { stroke: hsl(0 0% 70% / .5); stroke-width: 2; }
+.floor-n { font-size: 22px; font-weight: 900; fill: hsl(var(--h) 80% 70% / .35); }
+.win { fill: hsl(var(--h) 80% 70% / .14); stroke: hsl(var(--h) 85% 72% / .35); }
+.shaft { fill: hsl(0 0% 8%); stroke: hsl(0 0% 60% / .35); }
+.car { fill: hsl(0 0% 85%); filter: drop-shadow(0 0 5px #fff8); }
+.pole { fill: none; stroke: hsl(0 0% 65% / .6); stroke-width: 3; stroke-linecap: round; }
+.cable { fill: none; stroke: hsl(156 80% 62% / .7); stroke-width: 1.6; }
+.shelf { stroke: hsl(38 80% 65% / .4); }
+.crane { fill: none; stroke: hsl(228 85% 70% / .75); stroke-width: 2.5; stroke-linecap: round; }
+/* F 벤토 */
+.ic { fill: none; stroke: hsl(var(--h) 90% 75%); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.bnum { font-size: 22px; font-weight: 900; fill: hsl(var(--h) 80% 75% / .3); }
+.bdesc { font-size: 12.5px; font-weight: 500; fill: hsl(var(--h) 25% 88% / .85); }
+/* G 아코디언 */
+.tko2 { font-size: 13px; font-weight: 800; fill: hsl(var(--h) 90% 93%); }
+/* H 마인드맵 */
+.mm-edge { fill: none; stroke: hsl(var(--h) 80% 68% / .55); stroke-width: 2; }
+.mm-leaf-e { stroke: hsl(var(--h) 80% 68% / .3); stroke-width: 1; }
+.mm-dot { fill: hsl(var(--h) 90% 72%); }
+.mm-leaf { font-size: 11.5px; font-weight: 600; fill: hsl(var(--h) 30% 88% / .85); }
+.mm-c { fill: hsl(0 0% 12%); stroke: hsl(0 0% 85% / .6); stroke-width: 1.5; }
+.mm-c + text { fill: #fff; }
