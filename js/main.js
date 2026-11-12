@@ -1,5 +1,5 @@
 /* =========================================================
-   IT Knowledge Base — Main interactions
+   Computer Map — Main interactions
    ========================================================= */
 (() => {
   const reduced = window.KB_REDUCED;
